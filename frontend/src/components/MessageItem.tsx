@@ -51,7 +51,7 @@ const MessageItem: React.FC<MessageItemProps> = ({ message }) => {
                 {isUser ? '用户' : getAgentName(message.agent_type)}
               </Text>
               {!isUser && (
-                <Tag size="small" style={{ marginLeft: '8px' }}>
+                <Tag style={{ marginLeft: '8px' }}>
                   {message.agent_type}
                 </Tag>
               )}

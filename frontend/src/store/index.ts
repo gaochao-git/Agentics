@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Agent, Conversation, Message } from '../../types';
+import { Agent, Conversation, Message } from '../types';
 
 interface AppState {
   agents: Agent[];

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Layout, Typography, Spin, Alert } from 'antd';
 import AgentSidebar from '../components/AgentSidebar';
 import ChatInput from '../components/ChatInput';
@@ -122,7 +122,7 @@ const MainPage: React.FC = () => {
                 />
               )}
 
-              {currentConversation?.messages.map((message) => (
+              {currentConversation?.messages.map((message: Message) => (
                 <MessageItem key={message.id} message={message} />
               ))}
 

@@ -1,0 +1,39 @@
+ 开发指南：
+
+  环境配置
+
+  数据库配置 (backend/.env):
+  - 数据库名: agentics
+  - 用户名: agentics_admin
+  - 密码: agentics_1234
+  - 主机: localhost:3306
+
+  启动步骤
+
+  后端启动:
+  cd /Users/gaochao/wth/Agentics/backend/docker
+  docker-compose up -d  # 启动MySQL和Redis
+
+  cd /Users/gaochao/wth/Agentics/backend
+  python manage.py runserver
+
+  前端启动:
+  cd /Users/gaochao/wth/Agentics/frontend
+  npm install  # 首次运行
+  npm start    # 启动开发服务器 (http://localhost:3000)
+
+  数据表定义位置
+
+  数据表在以下文件定义 (backend/agents/core/models.py:5-36):
+  - Conversation: 对话记录
+  - Message: 消息记录
+  - AgentConfig: 智能体配置
+
+  其他智能体的models.py文件目前为空，可在各自的models.py中添加特定数据表。
+
+ 开发流程
+
+  1. 添加新智能体: 在agents/下创建新目录，参考现有结构
+  2. 数据库迁移: python manage.py makemigrations && python manage.py migrate
+  3. 前后端API: 后端在views.py定义API，前端在src/agents/core/api.ts调用
+

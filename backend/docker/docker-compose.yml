@@ -5,16 +5,17 @@ services:
     image: mysql:8.0
     container_name: agentics_mysql
     restart: always
+    env_file:
+      - ../.env
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: agentics_db
-      MYSQL_USER: agentics_user
-      MYSQL_PASSWORD: agentics_password
+      MYSQL_ROOT_PASSWORD: agentic_root
+      MYSQL_DATABASE: agentics
+      MYSQL_USER: agentics_admin
+      MYSQL_PASSWORD: agentics_1234
     ports:
       - "3306:3306"
     volumes:
       - mysql_data:/var/lib/mysql
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     command: --default-authentication-plugin=mysql_native_password
 
   redis:

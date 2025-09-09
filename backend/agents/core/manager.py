@@ -3,21 +3,22 @@ from langgraph.graph import StateGraph, END
 from .base import BaseAgent, AgentType, AgentMessage, AgentResponse, AgentState
 import asyncio
 import time
+import uuid
+from datetime import datetime
 
 
 class AgentManager:
     def __init__(self):
         self.agents: Dict[AgentType, BaseAgent] = {}
         self.graph = None
-        self._build_graph()
-
+    # 注册智能体
     def register_agent(self, agent: BaseAgent):
         self.agents[agent.agent_type] = agent
         self._build_graph()
-
+    # 获取智能体
     def get_agent(self, agent_type: AgentType) -> Optional[BaseAgent]:
         return self.agents.get(agent_type)
-
+    # 列出所有智能体
     def list_agents(self) -> List[Dict[str, str]]:
         return [
             {
@@ -28,21 +29,31 @@ class AgentManager:
             }
             for agent in self.agents.values()
         ]
-
+    # 构建智能体图
     def _build_graph(self):
+        if not self.agents:
+            return
+            
+        # 简化图结构，不使用复杂的边连接
         graph = StateGraph(AgentState)
         
+        # 只添加节点，不设置复杂的边关系
         for agent_type, agent in self.agents.items():
             graph.add_node(agent_type.value, self._create_agent_node(agent))
 
-        graph.add_edge("general_qa", END)
-        
-        for agent_type in self.agents.keys():
-            if agent_type != AgentType.GENERAL_QA:
-                graph.add_edge(agent_type.value, END)
+        # 设置默认入口点
+        if AgentType.GENERAL_QA in self.agents:
+            graph.set_entry_point("general_qa")
+        elif self.agents:
+            # 如果没有通用问答助手，使用第一个智能体作为入口
+            first_agent = list(self.agents.keys())[0]
+            graph.set_entry_point(first_agent.value)
 
-        graph.set_entry_point("general_qa")
-        self.graph = graph.compile()
+        try:
+            self.graph = graph.compile()
+        except Exception as e:
+            print(f"Warning: Failed to compile graph: {e}")
+            self.graph = None
 
     def _create_agent_node(self, agent: BaseAgent):
         async def agent_node(state: AgentState):
@@ -57,7 +68,8 @@ class AgentManager:
                     result_message = AgentMessage(
                         id=str(uuid.uuid4()),
                         content=response.content,
-                        agent_type=agent.agent_type
+                        agent_type=agent.agent_type,
+                        timestamp=datetime.now()
                     )
                     state.add_message(result_message)
                     state.update_context(f"{agent.agent_type.value}_response", response)
@@ -66,7 +78,8 @@ class AgentManager:
                     error_message = AgentMessage(
                         id=str(uuid.uuid4()),
                         content=f"Error: {str(e)}",
-                        agent_type=agent.agent_type
+                        agent_type=agent.agent_type,
+                        timestamp=datetime.now()
                     )
                     state.add_message(error_message)
                     
@@ -74,17 +87,14 @@ class AgentManager:
         return agent_node
 
     async def process_message(self, content: str, agent_type: AgentType = AgentType.GENERAL_QA) -> AgentResponse:
-        state = AgentState()
-        message = AgentMessage(
-            id=str(uuid.uuid4()),
-            content=content,
-            agent_type=agent_type
-        )
-        state.add_message(message)
-        state.current_agent = agent_type.value
-
         if agent_type in self.agents:
             agent = self.agents[agent_type]
+            message = AgentMessage(
+                id=str(uuid.uuid4()),
+                content=content,
+                agent_type=agent_type,
+                timestamp=datetime.now()
+            )
             return await agent.process(message)
         else:
             return AgentResponse(

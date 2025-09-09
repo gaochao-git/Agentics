@@ -17,12 +17,21 @@ export interface Message {
   created_at: string;
 }
 
+export interface ChatMessage {
+  id: number;
+  content: string;
+  role: 'user' | 'assistant';
+  timestamp: string;
+  metadata?: Record<string, any>;
+}
+
 export interface Conversation {
   id: number;
   title: string;
   created_at: string;
   updated_at: string;
   messages: Message[];
+  agent_type?: string;
 }
 
 export interface Agent {
@@ -41,6 +50,8 @@ export interface ChatRequest {
 export interface ChatResponse {
   conversation_id: number;
   response: string;
+  content: string;
+  metadata: Record<string, any>;
   agent_type: string;
   success: boolean;
   execution_time: number;

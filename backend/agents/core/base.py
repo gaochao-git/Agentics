@@ -5,7 +5,7 @@ from enum import Enum
 import uuid
 from datetime import datetime
 
-
+# 智能体类型
 class AgentType(Enum):
     GENERAL_QA = "general_qa"
     SPEECH_WRITER = "speech_writer"

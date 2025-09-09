@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 
 class Conversation(models.Model):
     id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user_id = models.IntegerField(null=True, blank=True)
     title = models.CharField(max_length=200, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -15,7 +15,7 @@ class Conversation(models.Model):
 
 class Message(models.Model):
     id = models.AutoField(primary_key=True)
-    conversation = models.ForeignKey(Conversation, related_name='messages', on_delete=models.CASCADE)
+    conversation_id = models.IntegerField()
     content = models.TextField()
     agent_type = models.CharField(max_length=50)
     is_user_message = models.BooleanField(default=True)
