@@ -1,10 +1,12 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Layout, Typography, Spin, Alert } from 'antd';
 import AgentSidebar from '../components/AgentSidebar';
 import ChatInput from '../components/ChatInput';
 import MessageItem from '../components/MessageItem';
+import StreamOutput from '../components/StreamOutput';
 import { useAppStore } from '../store';
 import { agentApi } from '../agents/core/api';
+import { useStreaming } from '../hooks/useStreaming';
 import { Message } from '../types';
 
 const { Header, Content } = Layout;
@@ -24,6 +26,12 @@ const MainPage: React.FC = () => {
   } = useAppStore();
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const [streamingMessage, setStreamingMessage] = useState<{
+    userMessage: Message;
+    conversationId?: number;
+    documentId?: number;
+    rawContent?: string;
+  } | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -31,10 +39,46 @@ const MainPage: React.FC = () => {
 
   useEffect(() => {
     scrollToBottom();
-  }, [currentConversation?.messages]);
+  }, [currentConversation?.messages, streamingMessage]);
+
+  const { isStreaming, streamContent, startStream, stopStream } = useStreaming({
+    onComplete: (data) => {
+      if (streamingMessage) {
+        const agentMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          content: data.raw_content,
+          agent_type: selectedAgent,
+          is_user_message: false,
+          created_at: new Date().toISOString()
+        };
+
+        addMessage(agentMessage);
+
+        if (!currentConversation && streamingMessage.conversationId) {
+          setCurrentConversation({
+            id: streamingMessage.conversationId,
+            title: streamingMessage.userMessage.content.substring(0, 50) + 
+                   (streamingMessage.userMessage.content.length > 50 ? '...' : ''),
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+            messages: [streamingMessage.userMessage, agentMessage]
+          });
+        }
+      }
+      setStreamingMessage(null);
+    },
+    onError: (error) => {
+      setError(error);
+      setStreamingMessage(null);
+    },
+    onConversationId: (conversationId) => {
+      if (streamingMessage) {
+        setStreamingMessage(prev => ({ ...prev!, conversationId }));
+      }
+    }
+  });
 
   const handleSendMessage = async (content: string) => {
-    setLoading(true);
     setError(null);
 
     const userMessage: Message = {
@@ -46,42 +90,51 @@ const MainPage: React.FC = () => {
     };
 
     addMessage(userMessage);
+    setStreamingMessage({
+      userMessage,
+      conversationId: currentConversation?.id
+    });
+
+    // 启动流式响应
+    startStream(content, selectedAgent, currentConversation?.id);
+  };
+
+  const handleCopy = () => {
+    // 可以添加复制成功的提示
+    console.log('Content copied to clipboard');
+  };
+
+  const handleRegenerate = () => {
+    if (streamingMessage) {
+      // 重新生成当前响应
+      startStream(
+        streamingMessage.userMessage.content, 
+        selectedAgent, 
+        streamingMessage.conversationId
+      );
+    }
+  };
+
+  const handleEdit = async (instruction: string, operation: 'expand' | 'compress' | 'polish' | 'edit') => {
+    if (!streamingMessage?.documentId) {
+      setError('无法编辑：未找到关联文档');
+      return;
+    }
 
     try {
-      const response = await agentApi.chat({
-        message: content,
-        agent_type: selectedAgent,
-        conversation_id: currentConversation?.id
+      const response = await agentApi.editDocument({
+        document_id: streamingMessage.documentId,
+        operation,
+        instruction
       });
 
-      const agentMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        content: response.response,
-        agent_type: response.agent_type,
-        is_user_message: false,
-        metadata: {
-          execution_time: response.execution_time,
-          success: response.success
-        },
-        created_at: new Date().toISOString()
-      };
-
-      addMessage(agentMessage);
-
-      if (!currentConversation) {
-        setCurrentConversation({
-          id: response.conversation_id,
-          title: content.substring(0, 50) + (content.length > 50 ? '...' : ''),
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-          messages: [userMessage, agentMessage]
-        });
+      if (response.success) {
+        // 更新显示内容
+        // 这里可以添加版本管理逻辑
+        console.log('Document edited successfully:', response);
       }
-
     } catch (err: any) {
-      setError(err.response?.data?.error || '发送消息失败');
-    } finally {
-      setLoading(false);
+      setError(err.response?.data?.error || '编辑失败');
     }
   };
 
@@ -126,7 +179,23 @@ const MainPage: React.FC = () => {
                 <MessageItem key={message.id} message={message} />
               ))}
 
-              {loading && (
+              {/* 流式输出显示 */}
+              {streamingMessage && (
+                <div style={{ marginBottom: '16px' }}>
+                  <MessageItem message={streamingMessage.userMessage} />
+                  <StreamOutput
+                    content={streamContent}
+                    rawContent={streamingMessage.rawContent || streamContent}
+                    isStreaming={isStreaming}
+                    onCopy={handleCopy}
+                    onRegenerate={handleRegenerate}
+                    onEdit={handleEdit}
+                    documentId={streamingMessage.documentId}
+                  />
+                </div>
+              )}
+
+              {loading && !isStreaming && (
                 <div style={{ textAlign: 'center', padding: '20px' }}>
                   <Spin size="large" />
                 </div>
@@ -137,7 +206,7 @@ const MainPage: React.FC = () => {
             
             <ChatInput 
               onSendMessage={handleSendMessage}
-              loading={loading}
+              loading={isStreaming || loading}
             />
           </Content>
         </Layout>

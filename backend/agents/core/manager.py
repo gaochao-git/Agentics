@@ -34,12 +34,15 @@ class AgentManager:
         if not self.agents:
             return
             
-        # 简化图结构，不使用复杂的边连接
+        # 简化图结构，创建独立的节点，每个节点都连接到END
         graph = StateGraph(AgentState)
         
-        # 只添加节点，不设置复杂的边关系
+        # 添加节点并设置边关系
         for agent_type, agent in self.agents.items():
-            graph.add_node(agent_type.value, self._create_agent_node(agent))
+            node_name = agent_type.value
+            graph.add_node(node_name, self._create_agent_node(agent))
+            # 每个节点处理完成后都结束流程
+            graph.add_edge(node_name, END)
 
         # 设置默认入口点
         if AgentType.GENERAL_QA in self.agents:
@@ -53,6 +56,7 @@ class AgentManager:
             self.graph = graph.compile()
         except Exception as e:
             print(f"Warning: Failed to compile graph: {e}")
+            # 创建一个简单的回退方案
             self.graph = None
 
     def _create_agent_node(self, agent: BaseAgent):

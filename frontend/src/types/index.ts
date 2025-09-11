@@ -56,3 +56,39 @@ export interface ChatResponse {
   success: boolean;
   execution_time: number;
 }
+
+export interface DocumentVersion {
+  id: number;
+  version_number: number;
+  formatted_content: string;
+  version_note: string;
+  operation_type: string;
+  created_at: string;
+}
+
+export interface Document {
+  id: number;
+  conversation_id: number;
+  title: string;
+  document_type: string;
+  current_version: number;
+  created_at: string;
+  updated_at: string;
+  versions?: DocumentVersion[];
+}
+
+export interface DocumentEditRequest {
+  document_id: number;
+  operation: 'expand' | 'compress' | 'polish' | 'edit';
+  instruction: string;
+  target_version?: number;
+}
+
+export interface DocumentEditResponse {
+  success: boolean;
+  document_id: number;
+  new_version: number;
+  content: string;
+  formatted_content: string;
+  error?: string;
+}

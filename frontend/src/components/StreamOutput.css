@@ -1,0 +1,360 @@
+.stream-output {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  background: #ffffff;
+  overflow: hidden;
+  margin: 16px 0;
+}
+
+/* 工具栏样式 */
+.output-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 16px;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.toolbar-left {
+  display: flex;
+  gap: 8px;
+}
+
+.toolbar-right {
+  display: flex;
+  align-items: center;
+}
+
+.tool-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  background: #ffffff;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tool-btn:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.tool-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.tool-btn:disabled:hover {
+  background: #ffffff;
+  border-color: #d1d5db;
+}
+
+.content-stats {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+/* 编辑面板样式 */
+.edit-panel {
+  padding: 16px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.edit-operations {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.edit-operations label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  color: #374151;
+}
+
+.edit-operations input[type="radio"] {
+  margin: 0;
+}
+
+.edit-input textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 14px;
+  resize: vertical;
+  min-height: 80px;
+}
+
+.edit-input textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.edit-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.btn-primary {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 16px;
+  background: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #2563eb;
+}
+
+.btn-primary:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  padding: 8px 16px;
+  background: #ffffff;
+  color: #374151;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover {
+  background: #f3f4f6;
+}
+
+/* 版本历史面板样式 */
+.versions-panel {
+  padding: 16px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e5e7eb;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.versions-panel h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.versions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.version-item {
+  padding: 12px;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.version-item:hover {
+  border-color: #3b82f6;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.version-item.active {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.version-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+
+.version-number {
+  font-weight: 600;
+  color: #3b82f6;
+  font-size: 12px;
+}
+
+.version-operation {
+  padding: 2px 6px;
+  background: #f3f4f6;
+  border-radius: 3px;
+  font-size: 11px;
+  color: #6b7280;
+}
+
+.version-date {
+  font-size: 11px;
+  color: #9ca3af;
+  margin-left: auto;
+}
+
+.version-note {
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+/* 内容显示区域样式 */
+.output-content {
+  position: relative;
+  padding: 20px;
+  background: #ffffff;
+  min-height: 100px;
+}
+
+.output-content.streaming {
+  background: linear-gradient(135deg, #ffffff 0%, #fafafa 100%);
+}
+
+.content-text {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #374151;
+  word-break: break-word;
+  white-space: pre-wrap;
+}
+
+.content-line {
+  margin-bottom: 0;
+}
+
+.content-line:last-child {
+  margin-bottom: 0;
+}
+
+/* 流式输出指示器 */
+.streaming-indicator {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 4px;
+}
+
+.cursor {
+  font-size: 14px;
+  color: #3b82f6;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 50% {
+    opacity: 1;
+  }
+  51%, 100% {
+    opacity: 0;
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .output-toolbar {
+    flex-direction: column;
+    gap: 8px;
+    align-items: stretch;
+  }
+  
+  .toolbar-left {
+    flex-wrap: wrap;
+  }
+  
+  .toolbar-right {
+    justify-content: center;
+  }
+  
+  .edit-operations {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .edit-operations label {
+    font-size: 13px;
+  }
+  
+  .version-header {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  .version-date {
+    margin-left: 0;
+  }
+}
+
+/* 滚动条美化 */
+.versions-panel::-webkit-scrollbar {
+  width: 6px;
+}
+
+.versions-panel::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 3px;
+}
+
+.versions-panel::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 3px;
+}
+
+.versions-panel::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* 复制成功提示动画 */
+@keyframes copySuccess {
+  0% {
+    transform: scale(1);
+    background: #ffffff;
+  }
+  50% {
+    transform: scale(0.95);
+    background: #dcfce7;
+  }
+  100% {
+    transform: scale(1);
+    background: #ffffff;
+  }
+}
+
+.tool-btn.copy-success {
+  animation: copySuccess 0.6s ease;
+}
+
+/* 打字机效果优化 */
+.content-text.typing {
+  overflow: hidden;
+}
+
+/* 版本切换动画 */
+.content-text {
+  transition: opacity 0.3s ease;
+}
+
+.content-text.version-switching {
+  opacity: 0.7;
+}
