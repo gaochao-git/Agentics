@@ -15,8 +15,10 @@ from .serializers import (ConversationSerializer, ChatRequestSerializer, AgentCo
 from .base import AgentType, AgentMessage
 from .initialization import lazy_get_agent_manager
 from .utils import markdown_to_plain_text, extract_title_from_content, detect_document_type
-from asgiref.sync import sync_to_async
 import asyncio
+import threading
+from concurrent.futures import ThreadPoolExecutor
+from asgiref.sync import sync_to_async
 
 
 @method_decorator(csrf_exempt, name='dispatch')
@@ -195,7 +197,17 @@ class StreamChatView(APIView):
                 yield f"data: {json.dumps({'type': 'conversation_id', 'data': conversation.id})}\n\n"
                 
                 # 处理消息
-                response = asyncio.run(self._process_message_async(message_content, agent_type))
+                def process_message():
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
+                    try:
+                        return loop.run_until_complete(self._process_message_async(message_content, agent_type))
+                    finally:
+                        loop.close()
+                
+                with ThreadPoolExecutor() as executor:
+                    future = executor.submit(process_message)
+                    response = future.result()
                 
                 if response.success:
                     # 分段发送内容
@@ -386,3 +398,41 @@ class AgentListView(APIView):
         agent_manager = lazy_get_agent_manager()
         agents = agent_manager.list_agents()
         return Response(agents)
+
+
+@method_decorator(csrf_exempt, name='dispatch')
+class TestStreamView(APIView):
+    permission_classes = [AllowAny]
+    
+    def post(self, request):
+        """简单的测试流式响应"""
+        
+        def generate_test_stream():
+            """生成测试流式数据"""
+            try:
+                test_message = "这是一个测试流式响应。"
+                
+                # 发送会话ID
+                yield f"data: {json.dumps({'type': 'conversation_id', 'data': 999})}\\n\\n"
+                
+                # 分段发送测试消息
+                chunk_size = 3
+                for i in range(0, len(test_message), chunk_size):
+                    chunk = test_message[i:i + chunk_size]
+                    yield f"data: {json.dumps({'type': 'content', 'data': chunk})}\\n\\n"
+                    time.sleep(0.2)
+                
+                # 发送完成信号
+                yield f"data: {json.dumps({'type': 'complete', 'data': {'raw_content': test_message, 'formatted_content': test_message}})}\\n\\n"
+                
+            except Exception as e:
+                yield f"data: {json.dumps({'type': 'error', 'data': str(e)})}\\n\\n"
+
+        response = StreamingHttpResponse(
+            generate_test_stream(),
+            content_type='text/event-stream'
+        )
+        response['Cache-Control'] = 'no-cache'
+        response['Connection'] = 'keep-alive'
+        response['Access-Control-Allow-Origin'] = '*'
+        return response

@@ -31,7 +31,7 @@ export const useStreaming = (options: UseStreamingOptions = {}) => {
     abortControllerRef.current = new AbortController();
 
     try {
-      const response = await fetch('/api/agents/core/stream-chat/', {
+      const response = await fetch('/api/agents/stream-chat/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

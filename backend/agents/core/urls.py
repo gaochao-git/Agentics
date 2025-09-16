@@ -1,9 +1,10 @@
 from django.urls import path
-from .views import ChatView, ConversationListView, AgentListView, StreamChatView, DocumentEditView, DocumentView
+from .views import ChatView, ConversationListView, AgentListView, StreamChatView, DocumentEditView, DocumentView, TestStreamView
 
 urlpatterns = [
     path('chat/', ChatView.as_view(), name='chat'),
     path('stream-chat/', StreamChatView.as_view(), name='stream_chat'),
+    path('test-stream/', TestStreamView.as_view(), name='test_stream'),
     path('conversations/', ConversationListView.as_view(), name='conversations'),
     path('list/', AgentListView.as_view(), name='agent_list'),
     path('documents/', DocumentView.as_view(), name='documents'),

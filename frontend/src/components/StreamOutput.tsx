@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { Copy, RotateCcw, Edit, Save, History, Plus, Minus } from 'lucide-react';
 import './StreamOutput.css';
 
